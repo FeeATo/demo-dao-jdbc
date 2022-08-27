@@ -10,6 +10,7 @@ import java.util.List;
 
 import db.DB;
 import db.DBException;
+import db.DBIntegrityException;
 import model.dao.DepartmentDao;
 import model.entities.Department;
 
@@ -55,13 +56,38 @@ private Connection conn;
 
 	@Override
 	public void update(Department obj) {
-		// TODO Auto-generated method stub
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement("UPDATE Department SET Name=? "
+					+ "WHERE Id=?");
+						
+			st.setString(1, obj.getName());
+			st.setInt(2, obj.getId());
+			
+			st.executeUpdate();
+		} catch(SQLException e) {
+			throw new DBException(e.getMessage());
+		} 
+		finally {
+			DB.closeStatement(st);
+		}
 		
 	}
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement("DELETE FROM Department WHERE Id=?");						
+			st.setInt(1, id);					
+			st.executeUpdate();
+			
+		} catch(SQLException e) {			
+			throw new DBIntegrityException("You can't delete a Department that has "
+					+ "sellers associating it! Error: " +  e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+		}
 		
 	}
 
